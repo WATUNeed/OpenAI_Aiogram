@@ -22,6 +22,8 @@ async def get_url(src: str, status: int):
 async def response_request(url_finder):
     async with aiohttp.ClientSession() as session:
         async with session.post(url=url_finder.url, headers=url_finder.headers, data=url_finder.data) as resp:
+            if resp.status != 200:
+                raise Exception(f'Response status error. {resp.status}')
             src = await resp.text()
             await session.close()
             return await get_url(src, resp.status)

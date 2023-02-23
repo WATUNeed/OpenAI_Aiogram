@@ -10,7 +10,6 @@ from ArticleLinkFinder import ArticleLinkFinder, response_request
 
 from MessageCreator import get_message
 
-import asyncio
 
 env = '6115324570:AAFhFRtMRozek0f7Dpq070u1AB627At0ulc'
 
@@ -34,11 +33,10 @@ def get_button_source_url(url: str, message='Ссылка на источник'
 async def send(message: types.Message):
     await message.answer('Please waiting...')
     age_post, status = await send_post()
-    await message.answer(text=f'Responece status: {status}\nage_post: {age_post} hours')
+    await message.answer(text=f'Response status: {status}\nage_post: {age_post} hours')
 
 
 async def send_post():
-    answer = 'Self-hosted wallet ban avoided in new draft of EU’s anti-money laundering bill.'
     url_finder = ArticleLinkFinder()
     age_post, img, url, status = await response_request(url_finder)
     message = await get_message(url)
