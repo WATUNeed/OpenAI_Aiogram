@@ -1,14 +1,36 @@
 import aiohttp
-import asyncio
 from bs4 import BeautifulSoup
-import aiofiles
+
+
+async def get_url(src: str, status: int):
+    soup = BeautifulSoup(src, 'lxml')
+
+    posts = soup.find_all(class_='list-post unlocked')
+    posts_new = list()
+
+    for post in posts:
+        age = post.find(class_='read').text.split()
+        if age[1] == 'hours':
+            age_post = int(age[0])
+            img = post.find(class_='cover').find('img').get('src')
+            url = post.find('a').get('href')
+            posts_new.append((age_post, img, url))
+    if posts_new:
+        return (newest_post := min(posts_new))[0], newest_post[1], newest_post[2], status
+
+
+async def response_request(url_finder):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url=url_finder.url, headers=url_finder.headers, data=url_finder.data) as resp:
+            src = await resp.text()
+            await session.close()
+            return await get_url(src, resp.status)
 
 
 class ArticleLinkFinder:
-    __slots__ = 'article_url', 'headers', 'data', 'url'
+    __slots__ = 'headers', 'data', 'url'
 
     def __init__(self):
-
         self.url = 'https://cryptoslate.com/top-news'
 
         self.headers = {
@@ -34,36 +56,8 @@ class ArticleLinkFinder:
             'aw': 'umUiAPGccRss-16-79d8dbb71d1c2074',
         }
 
-        self.article_url = self.get_article_link()
 
-    def get_article_link(self):
-        asyncio.run(self.main())
-
-    async def main(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url=self.url, headers=self.headers, data=self.data) as resp:
-                print(resp.status)
-                async with aiofiles.open('index.html', mode='w', encoding='utf-8') as f:
-                    await f.write(await resp.text())
-
-
-#ArticleLinkFinder()
-
-
-with open('index.html', 'r', encoding='utf-8') as file:
-    src = file.read()
-
-soup = BeautifulSoup(src, 'lxml')
-
-posts = soup.find_all(class_='list-post unlocked')
-posts_new = list()
-
-for post in posts:
-    age = post.find(class_='read').text.split()
-    if age[1] == 'hours':
-        age_post = int(age[0])
-        img = post.find(class_='cover').find('img').get('src')
-        url = post.find('a').get('href')
-        posts_new.append((age_post, img, url))
-
-print(posts_new)
+if __name__ == '__main__':
+    article_finder = ArticleLinkFinder()
+    result = response_request(article_finder)
+    print(result)
