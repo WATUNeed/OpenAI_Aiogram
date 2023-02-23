@@ -1,11 +1,14 @@
 import aiohttp
 from bs4 import BeautifulSoup
+from sqlite import find_post
 
 
 async def get_url(src: str, status: int):
     soup = BeautifulSoup(src, 'lxml')
 
     posts = soup.find_all(class_='list-post unlocked')
+    if not posts:
+        raise Exception(f'posts is None.')
     posts_new = list()
 
     for post in posts:
@@ -14,18 +17,23 @@ async def get_url(src: str, status: int):
             age_post = int(age[0])
             img = post.find(class_='cover').find('img').get('src')
             url = post.find('a').get('href')
+            if any([not age_post, not img, not url]):
+                raise Exception('Invalid age_post, img or url')
             posts_new.append((age_post, img, url))
-    if posts_new:
-        return (newest_post := min(posts_new))[0], newest_post[1], newest_post[2], status
+    for post in posts_new:
+        if not await find_post(url=post[2]):
+            return post[0], post[1], post[2], status
 
 
 async def response_request(url_finder):
     async with aiohttp.ClientSession() as session:
         async with session.post(url=url_finder.url, headers=url_finder.headers, data=url_finder.data) as resp:
-            if resp.status != 200:
-                raise Exception(f'Response status error. {resp.status}')
             src = await resp.text()
             await session.close()
+            if resp.status != 200:
+                raise Exception(f'Response status error. {resp.status}')
+            if not src:
+                raise Exception(f'src is None.')
             return await get_url(src, resp.status)
 
 
@@ -57,9 +65,3 @@ class ArticleLinkFinder:
             'sh': '57a1a881687ad0c0952b8335b008affe',
             'aw': 'umUiAPGccRss-16-79d8dbb71d1c2074',
         }
-
-
-if __name__ == '__main__':
-    article_finder = ArticleLinkFinder()
-    result = response_request(article_finder)
-    print(result)
