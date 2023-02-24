@@ -19,28 +19,29 @@ import logging.handlers
 
 import json
 
-bot = Bot(environ.get('Hideway_Crypto_bot'))
-dispatcher = Dispatcher(bot)
-logger = logging.getLogger('bot')
-chanall_id = '@hidewaycrypto'
+
+BOT = Bot(environ.get('HidewayPosterBot'))
+DP = Dispatcher(BOT)
+LOGGER = logging.getLogger('bot')
+CHANNEL_ID = '@hidewaycrypto'
 
 
 async def on_startup(_) -> None:
     await init_logging()
     await db_start()
-    logger.info('Bot was initialized')
+    LOGGER.info('Bot was initialized')
 
 
 async def init_scheduler() -> None:
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(send_post_interval, trigger='interval', hours=1)
     scheduler.start()
-    logger.info('scheduler was initialized')
+    LOGGER.info('scheduler was initialized')
 
 
 async def init_logging() -> None:
     logging.config.dictConfig(get_log_config())
-    logger.debug('logger was initialized')
+    LOGGER.debug('logger was initialized')
 
 
 def get_log_config() -> dict:
@@ -63,49 +64,49 @@ def get_button_url(url: str, message='Ссылка на источник') -> ty
     return button_source_reference
 
 
-@dispatcher.message_handler(commands=['start', 'Start', 'START'])
+@DP.message_handler(commands=['start', 'Start', 'START'])
 async def start_bot(message: types.Message) -> None:
-    await bot.send_message(message.from_user.id, 'Select function: 🛠', reply_markup=await get_keyboard())
+    await BOT.send_message(message.from_user.id, 'Select function: 🛠', reply_markup=await get_keyboard())
 
 
-@dispatcher.callback_query_handler(text='post')
-@dispatcher.message_handler(commands=['post', 'Post', 'POST'])
+@DP.callback_query_handler(text='post')
+@DP.message_handler(commands=['post', 'Post', 'POST'])
 async def create_post(message: types.Message) -> None:
-    logger.info('Call to create a post')
+    LOGGER.info('Call to create a post')
     answer = await message.answer('A post in the making...')
     try:
         await send_post_interval()
     except Exception as e:
-        logger.exception(e)
+        LOGGER.exception(e)
         await answer.edit_text('An error during post creation')
     finally:
-        logger.info('The post was successfully created')
+        LOGGER.info('The post was successfully created')
         await answer.edit_text('The post was successfully created')
 
 
-@dispatcher.callback_query_handler(text='run')
-@dispatcher.message_handler(commands=['run', 'Run', 'RUN'])
+@DP.callback_query_handler(text='run')
+@DP.message_handler(commands=['run', 'Run', 'RUN'])
 async def run_scheduler(message: types.Message) -> None:
     await init_scheduler()
     await message.answer('Scheduler was successfully created')
 
 
-@dispatcher.message_handler(commands=['clear', 'Clear', 'CLEAR'])
+@DP.message_handler(commands=['clear', 'Clear', 'CLEAR'])
 async def main(message: types.Message):
-    return await bot.send_message(message.from_user.id, 'cleared', reply_markup=types.ReplyKeyboardRemove())
+    return await BOT.send_message(message.from_user.id, 'cleared', reply_markup=types.ReplyKeyboardRemove())
 
 
 async def send_post_interval() -> None:
     html = await get_html_markup(SiteData())
-    logger.info('HTML successfully received')
+    LOGGER.info('HTML successfully received')
     img, url = await get_article_data(html)
-    logger.info('img and url successfully received')
+    LOGGER.info('img and url successfully received')
     message = await get_message(url)
-    await bot.send_photo(chat_id=chanall_id, photo=img, caption=message, reply_markup=get_button_url(url=url))
+    await BOT.send_photo(chat_id=CHANNEL_ID, photo=img, caption=message, reply_markup=get_button_url(url=url))
 
 
 if __name__ == '__main__':
     try:
-        executor.start_polling(dispatcher, skip_updates=True, on_startup=on_startup, timeout=120)
+        executor.start_polling(DP, skip_updates=True, on_startup=on_startup, timeout=120)
     except exceptions.NetworkError as e:
-        logger.exception(e)
+        LOGGER.exception(e)

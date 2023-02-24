@@ -6,12 +6,13 @@ from SQLite import url_in_db
 
 import logging
 
-logger = logging.getLogger('bot.SiteData')
+
+LOGGER = logging.getLogger('bot.SiteData')
 
 
 async def on_validate(condition: bool, e: str):
     if condition:
-        logger.error(e)
+        LOGGER.error(e)
         raise Exception(e)
 
 
@@ -22,7 +23,7 @@ async def get_article_data(html: str) -> (str, str):
 
     await on_validate(condition=not articles, e='Posts is None.')
 
-    logger.debug('Articles found successfully')
+    LOGGER.debug('Articles found successfully')
     newest_articles = list()
 
     for article in articles:
@@ -36,7 +37,7 @@ async def get_article_data(html: str) -> (str, str):
             newest_articles.append((img, url))
 
     await on_validate(condition=not newest_articles, e='The newest article was not found.')
-    logger.debug('img and url found successfully')
+    LOGGER.debug('img and url found successfully')
 
     for article_data in newest_articles:
         if not await url_in_db(url=article_data[1]):
@@ -44,7 +45,7 @@ async def get_article_data(html: str) -> (str, str):
 
 
 async def get_html_markup(site_data) -> str:
-    logger.info('Connecting to the site...')
+    LOGGER.info('Connecting to the site...')
     async with aiohttp.ClientSession() as session:
         async with session.post(url=site_data.url, headers=site_data.headers, data=site_data.data) as resp:
             html = await resp.text()
@@ -53,7 +54,7 @@ async def get_html_markup(site_data) -> str:
             await on_validate(condition=resp.status != 200, e='Response status error.')
             await on_validate(condition=not html, e='HTML is None.')
 
-            logger.info('Connection to the site was successful')
+            LOGGER.info('Connection to the site was successful')
             return html
 
 
