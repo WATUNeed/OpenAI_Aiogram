@@ -21,11 +21,11 @@ import json
 bot = Bot(environ.get('Hideway_Crypto_bot'))
 dispatcher = Dispatcher(bot)
 logger = logging.getLogger('Bot')
+channel_id = '@hidewaycrypto'
 
 
-async def on_startup(_) -> None:
+async def on_startup() -> None:
     await init_logging()
-    await init_scheduler()
     await db_start()
     logger.info('Bot was initialized')
 
@@ -66,13 +66,19 @@ async def create_post(message: types.Message) -> None:
         await answer.edit_text('The post was successfully created')
 
 
+@dispatcher.message_handler(commands=['run_schedule'])
+async def start_scheduler(message: types.Message) -> None:
+    await init_scheduler()
+    await message.answer('Schedule is up and running')
+
+
 async def send_post_interval() -> None:
     html = await get_html_markup(SiteData())
     logger.info('HTML successfully received')
     img, url = await get_article_data(html)
     logger.info('img and url successfully received')
     message = await get_message(url)
-    await bot.send_photo(chat_id='@hidewaycrypto', photo=img, caption=message, reply_markup=get_button_url(url=url))
+    await bot.send_photo(chat_id=channel_id, photo=img, caption=message, reply_markup=get_button_url(url=url))
     logger.info('The post was successfully created')
 
 
