@@ -63,7 +63,6 @@ async def create_post(message: types.Message) -> None:
         logger.exception(e)
         await answer.edit_text('An error during post creation')
     finally:
-        logger.info('The post was successfully created')
         await answer.edit_text('The post was successfully created')
 
 
@@ -74,6 +73,7 @@ async def send_post_interval() -> None:
     logger.info('img and url successfully received')
     message = await get_message(url)
     await bot.send_photo(chat_id='@hidewaycrypto', photo=img, caption=message, reply_markup=get_button_url(url=url))
+    logger.info('The post was successfully created')
 
 
 if __name__ == '__main__':

@@ -11,10 +11,7 @@ logger = logging.getLogger('Bot.MessageCreator')
 
 openai.api_key = os.environ.get('OpenAI_API')
 
-prompt = 'Я веду телеграмм канал с новостями о криптовалюте на русском языке. ' \
-         'Выдели основные мысли из статьи и кратко запиши их. Каждую мысль выдели в абзац. ' \
-         'Не более 10-15 строк. В конце добавь 4 хештега по теме.' \
-         'Статья: '
+prompt = ('Write a small post for a social media based on the article: ', ' and translate it into Russian')
 
 
 async def get_message(url: str) -> str:
@@ -23,7 +20,7 @@ async def get_message(url: str) -> str:
         logger.debug('Trying to get a response from OpenAi')
         response = openai.Completion.create(
             model="text-davinci-003",
-            prompt=f'{prompt}{url}',
+            prompt=f'{prompt[0]}{url}{prompt[1]}',
             temperature=0.9,
             max_tokens=1000,
             top_p=1.0,
