@@ -8,7 +8,7 @@ from SiteData import SiteData, get_html_markup, get_article_data
 
 from MessageCreator import get_message
 
-from sqlite import db_start
+from SQLite import db_start
 
 from os import environ
 

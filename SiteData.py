@@ -2,7 +2,7 @@ import aiohttp
 
 from bs4 import BeautifulSoup
 
-from sqlite import url_in_db
+from SQLite import url_in_db
 
 import logging
 
