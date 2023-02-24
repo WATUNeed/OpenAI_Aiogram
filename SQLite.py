@@ -3,7 +3,7 @@ import sqlite3 as sq
 import logging
 
 
-logger = logging.getLogger('Bot.sqlite')
+logger = logging.getLogger('bot.sqlite')
 
 
 async def db_start() -> None:

@@ -7,11 +7,11 @@ import asyncio
 import logging
 
 
-logger = logging.getLogger('Bot.MessageCreator')
+logger = logging.getLogger('bot.MessageCreator')
 
 openai.api_key = os.environ.get('OpenAI_API')
 
-prompt = ('Write a small post for a social media based on the article: ', ' and translate it into Russian')
+prompt = ('Write a short post for the social network based on the article: ', ' translate and write it in Russian.')
 
 
 async def get_message(url: str) -> str:
