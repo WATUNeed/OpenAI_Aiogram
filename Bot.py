@@ -25,15 +25,6 @@ logger = logging.getLogger('bot')
 chanall_id = '@hidewaycrypto'
 
 
-async def get_keyboard() -> InlineKeyboardMarkup:
-    btn_post = InlineKeyboardButton(text='Create new post ✍', callback_data='post')
-    btn_run = InlineKeyboardButton(text='Run the scheduler ⏳', callback_data='run')
-    menu = InlineKeyboardMarkup(row_width=2)
-    menu.insert(btn_post)
-    menu.insert(btn_run)
-    return menu
-
-
 async def on_startup(_) -> None:
     await init_logging()
     await db_start()
@@ -55,6 +46,15 @@ async def init_logging() -> None:
 def get_log_config() -> dict:
     with open('localLogConfig.json', 'r') as config:
         return json.load(config)
+
+
+async def get_keyboard() -> InlineKeyboardMarkup:
+    btn_post = InlineKeyboardButton(text='Create new post ✍', callback_data='post')
+    btn_run = InlineKeyboardButton(text='Run the scheduler ⏳', callback_data='run')
+    menu = InlineKeyboardMarkup(row_width=2)
+    menu.insert(btn_post)
+    menu.insert(btn_run)
+    return menu
 
 
 def get_button_url(url: str, message='Ссылка на источник') -> types.InlineKeyboardMarkup:
