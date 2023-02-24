@@ -24,7 +24,7 @@ logger = logging.getLogger('Bot')
 channel_id = '@hidewaycrypto'
 
 
-async def on_startup() -> None:
+async def on_startup(_) -> None:
     await init_logging()
     await db_start()
     logger.info('Bot was initialized')
