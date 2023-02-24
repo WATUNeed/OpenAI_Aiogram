@@ -6,7 +6,7 @@ from SQLite import url_in_db
 
 import logging
 
-logger = logging.getLogger('bot.SiteData')
+logger = logging.getLogger('Bot.SiteData')
 
 
 async def on_validate(condition: bool, e: str):

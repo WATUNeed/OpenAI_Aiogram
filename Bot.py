@@ -20,7 +20,7 @@ import json
 
 bot = Bot(environ.get('Hideway_Crypto_bot'))
 dispatcher = Dispatcher(bot)
-logger = logging.getLogger('bot')
+logger = logging.getLogger('Bot')
 
 
 async def on_startup(_) -> None:

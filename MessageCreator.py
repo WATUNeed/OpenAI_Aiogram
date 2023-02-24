@@ -7,7 +7,7 @@ import asyncio
 import logging
 
 
-logger = logging.getLogger('bot.MessageCreator')
+logger = logging.getLogger('Bot.MessageCreator')
 
 openai.api_key = os.environ.get('OpenAI_API')
 
