@@ -79,6 +79,7 @@ async def create_post(message: types.Message) -> None:
     except Exception as e:
         LOGGER.exception(e)
         await answer.edit_text('An error during post creation')
+        return
     finally:
         LOGGER.info('The post was successfully created')
         await answer.edit_text('The post was successfully created')

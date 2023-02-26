@@ -51,7 +51,7 @@ async def get_html_markup(site_data) -> str:
             html = await resp.text()
             await session.close()
 
-            await on_validate(condition=resp.status != 200, e='Response status error.')
+            assert resp.status == 200, 'Response status error.'
             await on_validate(condition=not html, e='HTML is None.')
 
             LOGGER.info('Connection to the site was successful')

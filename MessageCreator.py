@@ -11,7 +11,14 @@ openai.api_key = os.environ.get('OpenAI_API')
 
 LOGGER = logging.getLogger('bot.MessageCreator')
 
-PROMPT = ('Write a short post for the social network based on the article: ', ' translate and write it in Russian.')
+PROMPT = ("Create a Russian-language social media post about the article ",
+          "do not include lists. "
+          "the keyword should be in the first or second sentence. "
+          "add a little emoji to the following text to make it easier to read and more engaging. "
+          "do not add explanation to your answer. "
+          "make the post no more than 250 words. "
+          "make it ironic and personal. "
+          "add four hashtags at the end on the topic.")
 
 
 async def get_message(url: str) -> str:
@@ -20,15 +27,12 @@ async def get_message(url: str) -> str:
         LOGGER.debug('Trying to get a response from OpenAi')
         response = openai.Completion.create(
             model="text-davinci-003",
-            prompt=f'{PROMPT[0]}{url}{PROMPT[1]}',
-            temperature=0.9,
+            prompt=f'{PROMPT[0]}{url} {PROMPT[1]}',
+            temperature=0.5,
             max_tokens=1000,
             top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
-            stream=False,
-            logprobs=None,
-            stop=['You:']
+            frequency_penalty=0.5,
+            presence_penalty=0.0
         )
     except openai.error as ex:
         LOGGER.error(str(ex))
