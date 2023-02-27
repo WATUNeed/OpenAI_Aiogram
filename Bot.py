@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from SiteData import SiteData, get_html_markup, get_article_data
+from SiteData import CryptoSlate, get_html_markup, get_article_data
 
 from MessageCreator import get_message
 
@@ -98,7 +98,7 @@ async def main(message: types.Message):
 
 
 async def send_post_interval() -> None:
-    html = await get_html_markup(SiteData())
+    html = await get_html_markup(CryptoSlate())
     LOGGER.info('HTML successfully received')
     img, url = await get_article_data(html)
     LOGGER.info('img and url successfully received')

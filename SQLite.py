@@ -4,6 +4,10 @@ import logging
 
 
 LOGGER = logging.getLogger('bot.sqlite')
+DB = sq.connect('bot.db')
+CURSOR = DB.cursor()
+CURSOR.execute('CREATE TABLE IF NOT EXISTS post(url TEXT PRIMARY KEY)')
+DB.commit()
 
 
 async def db_start() -> None:
@@ -27,5 +31,5 @@ async def url_in_db(url: str) -> bool:
         DB.commit()
         return False
     else:
-        LOGGER.debug('url is not in the database')
+        LOGGER.debug('url is in the database')
         return True

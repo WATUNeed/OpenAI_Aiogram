@@ -6,7 +6,6 @@ from SQLite import url_in_db
 
 import logging
 
-
 LOGGER = logging.getLogger('bot.SiteData')
 
 
@@ -28,13 +27,12 @@ async def get_article_data(html: str) -> (str, str):
 
     for article in articles:
         article_age = article.find(class_='read').text.split()
-        if article_age[1] == 'hours':
-            img = article.find(class_='cover').find('img').get('src')
-            url = article.find('a').get('href')
+        img = article.find(class_='cover').find('img').get('src')
+        url = article.find('a').get('href')
 
-            await on_validate(condition=any([not img, not url]), e='Invalid age_post, img or url.')
+        await on_validate(condition=any([not img, not url]), e='Invalid age_post, img or url.')
 
-            newest_articles.append((img, url))
+        newest_articles.append((img, url))
 
     await on_validate(condition=not newest_articles, e='The newest article was not found.')
     LOGGER.debug('img and url found successfully')
@@ -42,6 +40,9 @@ async def get_article_data(html: str) -> (str, str):
     for article_data in newest_articles:
         if not await url_in_db(url=article_data[1]):
             return article_data[0], article_data[1]
+        else:
+            LOGGER.error(e := 'no unique articles found')
+            raise Exception(e)
 
 
 async def get_html_markup(site_data) -> str:
@@ -59,6 +60,8 @@ async def get_html_markup(site_data) -> str:
 
 
 class Singleton(object):
+    __slots__ = 'url', 'headers', 'data'
+
     _instances = {}
 
     def __new__(cls, *args, **kwargs):
@@ -66,14 +69,17 @@ class Singleton(object):
             cls._instances[cls] = super(Singleton, cls).__new__(cls, *args, **kwargs)
         return cls._instances[cls]
 
+    def __init__(self, url, headers, data):
+        self.url = url
+        self.headers = headers
+        self.data = data
 
-class SiteData(Singleton):
-    __slots__ = 'headers', 'data', 'url'
+
+class CryptoSlate(Singleton):
+    __slots__ = ()
 
     def __init__(self):
-        self.url = 'https://cryptoslate.com/top-news'
-
-        self.headers = {
+        super().__init__(url='https://cryptoslate.com/top-news', headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
@@ -89,9 +95,7 @@ class SiteData(Singleton):
             'Sec-Fetch-User': '?1',
             # Requests doesn't support trailers
             # 'TE': 'trailers',
-        }
-
-        self.data = {
+        }, data={
             'md': '0GX98Fe2eutWqvmFE7yR05kotsBB7FNPWPDCZTvocVQ-1677080825-0-ATJMywi8h-IYkG2EiX0aqkgZC4H1GLilde0599K1W8'
                   'KnZiC9NSVAl-OCNXdtIlQr5O_yzllg5dIg1asGnyXjWTTqbK0wKlI8KNluouTzR1RyomjrcvabWylYlkcxOPSbzibLojoruDx21'
                   'uBZhNIlpFuyDSKAY2jYG9GCLx6oZ5TluUlZHsOCKnopFT5jVBu_zaELHKHmq2ouSML1-ZkNtjLnpoE4IqcZ6TvxKEryUxhiEEfb'
@@ -115,4 +119,25 @@ class SiteData(Singleton):
                   '1zqZcmT5zLOYmSpDlodE',
             'sh': '57a1a881687ad0c0952b8335b008affe',
             'aw': 'umUiAPGccRss-16-79d8dbb71d1c2074',
-        }
+        })
+
+
+class CoinTelegrath(Singleton):
+    __slots__ = ()
+
+    def __init__(self):
+        super().__init__(url='https://cointelegraph.com/', headers={
+            'Origin': 'http://fiddle.jshell.net',
+            # 'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Accept': '*/*',
+            'Referer': 'http://fiddle.jshell.net/_display/',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Connection': 'keep-alive',
+        }, data={
+            'msg1': 'wow',
+            'msg2': 'such',
+            'msg3': 'data',
+        })
