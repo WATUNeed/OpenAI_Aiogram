@@ -2,81 +2,15 @@ import aiohttp
 
 from bs4 import BeautifulSoup
 
-from SQLite import url_in_db
-
 import logging
 
-LOGGER = logging.getLogger('bot.SiteData')
+from websites import Websites
 
 
-async def on_validate(condition: bool, e: str):
-    if condition:
-        LOGGER.error(e)
-        raise Exception(e)
-
-
-async def get_article_data(html: str) -> (str, str):
-    soup = BeautifulSoup(html, 'lxml')
-
-    articles = soup.find_all(class_='list-post unlocked')
-
-    await on_validate(condition=not articles, e='Posts is None.')
-
-    LOGGER.debug('Articles found successfully')
-    newest_articles = list()
-
-    for article in articles:
-        article_age = article.find(class_='read').text.split()
-        img = article.find(class_='cover').find('img').get('src')
-        url = article.find('a').get('href')
-
-        await on_validate(condition=any([not img, not url]), e='Invalid age_post, img or url.')
-
-        newest_articles.append((img, url))
-
-    await on_validate(condition=not newest_articles, e='The newest article was not found.')
-    LOGGER.debug('img and url found successfully')
-
-    for article_data in newest_articles:
-        if not await url_in_db(url=article_data[1]):
-            return article_data[0], article_data[1]
-        else:
-            LOGGER.error(e := 'no unique articles found')
-            raise Exception(e)
-
-
-async def get_html_markup(site_data) -> str:
-    LOGGER.info('Connecting to the site...')
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=site_data.url, headers=site_data.headers, data=site_data.data) as resp:
-            html = await resp.text()
-            await session.close()
-
-            assert resp.status == 200, 'Response status error.'
-            await on_validate(condition=not html, e='HTML is None.')
-
-            LOGGER.info('Connection to the site was successful')
-            return html
-
-
-class Singleton(object):
-    __slots__ = 'url', 'headers', 'data'
-
-    _instances = {}
-
-    def __new__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__new__(cls, *args, **kwargs)
-        return cls._instances[cls]
-
-    def __init__(self, url, headers, data):
-        self.url = url
-        self.headers = headers
-        self.data = data
-
-
-class CryptoSlate(Singleton):
+class CryptoSlate(Websites):
     __slots__ = ()
+
+    LOGGER = logging.getLogger('bot.CryptoSlate')
 
     def __init__(self):
         super().__init__(url='https://cryptoslate.com/top-news', headers={
@@ -121,23 +55,39 @@ class CryptoSlate(Singleton):
             'aw': 'umUiAPGccRss-16-79d8dbb71d1c2074',
         })
 
+    async def get_article_data(self) -> (str, str):
+        html = await self._get_html_markup()
+        soup = BeautifulSoup(html, 'lxml')
 
-class CoinTelegrath(Singleton):
-    __slots__ = ()
+        articles = soup.find_all(class_='list-post unlocked')
 
-    def __init__(self):
-        super().__init__(url='https://cointelegraph.com/', headers={
-            'Origin': 'http://fiddle.jshell.net',
-            # 'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Accept': '*/*',
-            'Referer': 'http://fiddle.jshell.net/_display/',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Connection': 'keep-alive',
-        }, data={
-            'msg1': 'wow',
-            'msg2': 'such',
-            'msg3': 'data',
-        })
+        await self.on_validate(condition=not articles, e='Posts is None.')
+        self.LOGGER.debug('Articles found successfully')
+
+        articles_data = await self._separate_these_articles(articles=articles)
+
+        await self.on_validate(condition=not articles_data, e='The newest article was not found.')
+        self.LOGGER.debug('img and url found successfully')
+
+        return await self.find_unique_article(articles_data)
+
+    async def _get_html_markup(self) -> str:
+        self.LOGGER.info('Connecting to the site...')
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url=self.url, headers=self.headers, data=self.data) as resp:
+                html = await resp.text()
+                await session.close()
+
+                assert resp.status == 200, 'Response status error.'
+                await self.on_validate(condition=not html, e='HTML is None.')
+                self.LOGGER.info('Connection to the site was successful')
+
+                return html
+
+    async def _separate_these_articles(self, articles: list) -> list:
+        for index, article in enumerate(articles):
+            img = article.find(class_='cover').find('img').get('src')
+            url = article.find('a').get('href')
+            await self.on_validate(condition=any([not img, not url]), e='Invalid img or url.')
+            articles[index] = (img, url)
+        return articles

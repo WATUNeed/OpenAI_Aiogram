@@ -5,11 +5,12 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from SiteData import CryptoSlate, get_html_markup, get_article_data
+from cryptoslate import CryptoSlate
+from websites import Websites
 
 from MessageCreator import get_message
 
-from SQLite import db_start
+from database import DataBase
 
 from os import environ
 
@@ -28,7 +29,8 @@ CHANNEL_ID = '@hidewaycrypto'
 
 async def on_startup(_) -> None:
     await init_logging()
-    await db_start()
+    print(DataBase())
+    print(DataBase())
     LOGGER.info('Bot was initialized')
 
 
@@ -98,9 +100,9 @@ async def main(message: types.Message):
 
 
 async def send_post_interval() -> None:
-    html = await get_html_markup(CryptoSlate())
+    site = CryptoSlate()
     LOGGER.info('HTML successfully received')
-    img, url = await get_article_data(html)
+    img, url = await site.get_article_data()
     LOGGER.info('img and url successfully received')
     message = await get_message(url)
     await BOT.send_photo(chat_id=CHANNEL_ID, photo=img, caption=message, reply_markup=get_button_url(url=url))
