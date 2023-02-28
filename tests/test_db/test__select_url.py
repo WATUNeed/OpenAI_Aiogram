@@ -2,20 +2,9 @@ import pytest
 
 from database import DataBase
 
+from conftest import TestDataBase
+
 import asyncio
-
-import sqlite3
-
-
-TEST_DB_URL = 'test_db.db'
-
-
-class TestDataBase:
-    __slots__ = 'cursor'
-
-    def __init__(self):
-        database = sqlite3.connect(TEST_DB_URL)
-        self.cursor = database.cursor()
 
 
 @pytest.mark.parametrize('url, expect', [

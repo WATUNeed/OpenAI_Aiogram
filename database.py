@@ -23,14 +23,17 @@ class DataBase:
 
     async def url_in_database(self, url: str) -> bool:
         if not self._select_url(url):
-            self.LOGGER.debug('The url is in the database')
-            insert_url_into_post_table_query = f"INSERT INTO post VALUES('{url}')"
-            self.cursor.execute(insert_url_into_post_table_query)
-            self.database.commit()
+            self.LOGGER.debug('url is not in the database')
+            await self._insert_url(url)
             return False
         else:
             self.LOGGER.debug('url is in the database')
             return True
+
+    async def _insert_url(self, url: str) -> None:
+        insert_url_into_post_table_query = f"INSERT INTO post VALUES('{url}')"
+        self.cursor.execute(insert_url_into_post_table_query)
+        self.database.commit()
 
     async def _select_url(self, url: str) -> set:
         select_url_from_post_query = f"SELECT * FROM post WHERE url == '{url}'"
