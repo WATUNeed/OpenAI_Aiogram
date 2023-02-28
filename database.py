@@ -32,6 +32,6 @@ class DataBase:
             self.LOGGER.debug('url is in the database')
             return True
 
-    async def _select_url(self, url: str) -> str:
+    async def _select_url(self, url: str) -> set:
         select_url_from_post_query = f"SELECT * FROM post WHERE url == '{url}'"
         return self.cursor.execute(select_url_from_post_query).fetchone()

@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from SiteData import CryptoSlate, get_html_markup
+from websites import CryptoSlate, get_html_markup
 
 import asyncio
 
