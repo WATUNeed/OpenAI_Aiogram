@@ -71,12 +71,7 @@ async def start_bot(message: types.Message) -> None:
 async def create_post(message: types.Message) -> None:
     LOGGER.info('Call to create a post')
     answer = await message.answer('A post in the making...')
-    try:
-        await send_post_interval()
-    except Exception as e:
-        LOGGER.exception(e)
-        await answer.edit_text('An error during post creation')
-        return None
+    await send_post_interval()
     LOGGER.info('The post was successfully created')
     await answer.edit_text('The post was successfully created')
 
@@ -106,6 +101,4 @@ if __name__ == '__main__':
     try:
         executor.start_polling(DP, skip_updates=True, on_startup=on_startup, timeout=120)
     except exceptions.NetworkError as e:
-        LOGGER.exception(e)
-    except Exception as e:
         LOGGER.exception(e)

@@ -2,16 +2,19 @@ import logging
 
 from database import DataBase
 
+import asyncio
 
-def reconnect(*dargs, **dkwargs):
+
+def reconnect(delay: int, logger: logging):
     def outer(func):
         def inner(*args, **kwargs):
-            delay = dkwargs.get('delay')
             while True:
                 try:
                     return func(*args, **kwargs)
                 except Exception as err:
-                    print(err)
+                    logger(err)
+                    asyncio.sleep(delay)
+                    continue
         return inner
     return outer
 

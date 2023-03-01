@@ -6,7 +6,7 @@ import asyncio
 
 import logging
 
-from websites import Websites
+from websites import Websites, reconnect
 
 
 class MessageCreator:
@@ -38,6 +38,7 @@ class MessageCreator:
         self.LOGGER.debug('Spent tokens: %s', response['usage']['total_tokens'])
         return message
 
+    @reconnect(delay=360, logger=LOGGER)
     async def _get_response(self, url: str) -> str:
         return openai.Completion.create(
             model="text-davinci-003",
