@@ -1,6 +1,6 @@
 import pytest
 
-from Bot import get_button_url
+from __init__ import get_button_url
 
 
 @pytest.mark.parametrize("url, message, result", [

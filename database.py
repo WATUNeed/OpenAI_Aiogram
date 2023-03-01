@@ -22,7 +22,7 @@ class DataBase:
         self.database.commit()
 
     async def url_in_database(self, url: str) -> bool:
-        if not self._select_url(url):
+        if not await self._select_url(url):
             self.LOGGER.debug('url is not in the database')
             await self._insert_url(url)
             return False

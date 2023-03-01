@@ -76,10 +76,9 @@ async def create_post(message: types.Message) -> None:
     except Exception as e:
         LOGGER.exception(e)
         await answer.edit_text('An error during post creation')
-        return
-    finally:
-        LOGGER.info('The post was successfully created')
-        await answer.edit_text('The post was successfully created')
+        return None
+    LOGGER.info('The post was successfully created')
+    await answer.edit_text('The post was successfully created')
 
 
 @DP.callback_query_handler(text='run')
@@ -107,4 +106,6 @@ if __name__ == '__main__':
     try:
         executor.start_polling(DP, skip_updates=True, on_startup=on_startup, timeout=120)
     except exceptions.NetworkError as e:
+        LOGGER.exception(e)
+    except Exception as e:
         LOGGER.exception(e)

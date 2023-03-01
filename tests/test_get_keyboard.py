@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from Bot import get_keyboard
+from __init__ import get_keyboard
 
 import asyncio
 

@@ -3,6 +3,19 @@ import logging
 from database import DataBase
 
 
+def reconnect(*dargs, **dkwargs):
+    def outer(func):
+        def inner(*args, **kwargs):
+            delay = dkwargs.get('delay')
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as err:
+                    print(err)
+        return inner
+    return outer
+
+
 class Websites:
     __slots__ = 'url', 'headers', 'data'
 
@@ -31,6 +44,6 @@ class Websites:
         for article_data in articles_data:
             if not await DataBase().url_in_database(url=article_data[1]):
                 return article_data[0], article_data[1]
-            else:
-                self.LOGGER.error(e := 'no unique articles found')
-                raise Exception(e)
+        else:
+            self.LOGGER.error(e := 'no unique articles found')
+            raise Exception(e)
