@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 import logging
 
-from websites import Websites, reconnect
+from moduls.websites import Websites, reconnect
 
 
 class CryptoSlate(Websites):
@@ -74,7 +74,7 @@ class CryptoSlate(Websites):
     @reconnect(delay=10, logger=LOGGER)
     async def _get_html_markup(self) -> str:
         self.LOGGER.info('Connecting to the site...')
-        async with aiohttp.ClientSession(timeout=10) as session:
+        async with aiohttp.ClientSession() as session:
             async with session.post(url=self.url, headers=self.headers, data=self.data) as resp:
                 html = await resp.text()
                 await session.close()

@@ -1,6 +1,6 @@
 import pytest
 
-from database import DataBase
+from moduls.database import DataBase
 
 from conftest import TestDataBase
 

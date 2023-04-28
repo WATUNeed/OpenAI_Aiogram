@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from cryptoslate import CryptoSlate
+from moduls.parsers.cryptoslate import CryptoSlate
 
 from message_creator import MessageCreator
 
@@ -42,7 +42,7 @@ async def init_logging() -> None:
 
 
 def get_log_config() -> dict:
-    with open('localLogConfig.json', 'r') as config:
+    with open('../LocalLogConfig.json', 'r') as config:
         return json.load(config)
 
 
@@ -71,13 +71,17 @@ async def start_bot(message: types.Message) -> None:
 async def create_post(message: types.Message) -> None:
     LOGGER.info('Call to create a post')
     answer = await message.answer('A post in the making...')
-    await send_post_interval()
+    try:
+        await send_post_interval()
+    except Exception as e:
+        LOGGER.exception(e)
+        await answer.edit_text('An error during post creation')
+        return None
     LOGGER.info('The post was successfully created')
     await answer.edit_text('The post was successfully created')
 
 
 @DP.callback_query_handler(text='run')
-@DP.message_handler(commands=['run', 'Run', 'RUN'])
 async def run_scheduler(message: types.Message) -> None:
     await init_scheduler()
     await message.answer('Scheduler was successfully created')
@@ -101,4 +105,6 @@ if __name__ == '__main__':
     try:
         executor.start_polling(DP, skip_updates=True, on_startup=on_startup, timeout=120)
     except exceptions.NetworkError as e:
+        LOGGER.exception(e)
+    except Exception as e:
         LOGGER.exception(e)

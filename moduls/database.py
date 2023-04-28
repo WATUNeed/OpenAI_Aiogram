@@ -15,7 +15,7 @@ class DataBase:
         return DataBase._instances[cls]
 
     def __init__(self):
-        self.database = sq.connect('database.db')
+        self.database = sq.connect('../database/database.db')
         self.cursor = self.database.cursor()
         create_post_table_query = 'CREATE TABLE IF NOT EXISTS post(url TEXT PRIMARY KEY)'
         self.cursor.execute(create_post_table_query)

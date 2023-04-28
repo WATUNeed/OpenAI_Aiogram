@@ -1,8 +1,6 @@
 import logging
 
-from database import DataBase
-
-import asyncio
+from moduls.database import DataBase
 
 
 def reconnect(delay: int, logger: logging):
@@ -12,8 +10,8 @@ def reconnect(delay: int, logger: logging):
                 try:
                     return func(*args, **kwargs)
                 except Exception as err:
-                    logger(err)
-                    asyncio.sleep(delay)
+                    print('w')
+                    logger.error(err)
                     continue
         return inner
     return outer

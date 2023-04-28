@@ -1,6 +1,4 @@
-import logging
-
-from websites import Websites
+from moduls.websites import Websites
 
 
 class CoinTelegrath(Websites):
